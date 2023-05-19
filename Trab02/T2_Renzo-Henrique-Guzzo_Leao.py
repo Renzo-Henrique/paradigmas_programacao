@@ -182,30 +182,65 @@ def livro_lista_republicados(lista):
   lista_republicados = list(filter(lambda x: len(x[1]) > 1, lista_publicadoras))
   #retira as duplicatas
   return [x for i, x in enumerate(lista_republicados) if x not in lista_republicados[:i]]
+
 ##
 #----------Sobre o ano
 #
 #
-def public_apos_ano(lista, data):
+def ano_publicados(lista):
+  
+
+  #transforma a key 'ano_publicado' dos dicionarios da lista 
+  #para evitar repeticoes de ano de publicacao
+  return list(set([x['ano_publicado'] for x in lista]))
+
+def ano_public_apos_ano(lista, data):
+  data = str(data)
   return list( filter(lambda x: x['ano_publicado']>data, lista) )
-def public_antes_ano(lista, data):
+def ano_public_antes_ano(lista, data):
+  data = str(data)
   return list( filter(lambda x: x['ano_publicado']<data, lista) )
-def public_mesmo_ano(lista, data):
-  return list( filter(lambda x: x['ano_publicado']<data, lista) )
+def ano_public_mesmo_ano(lista, data):
+  data = str(data)
+  return list( filter(lambda x: x['ano_publicado']==data, lista) )
+
+def ano_lista_livros(lista,data):
+  lista_livros = ano_public_mesmo_ano(lista, data)
+  #transforma a key 'livro' no dicionario lista_livros em um conjunto 
+  #para evitar repeticoes de livro
+  return list(set([x['livro'] for x in lista_livros]))
+
+def ano_qtd_livros(lista,data):
+  return (data,len(ano_lista_livros(lista,data)))
+
+def ano_lista_concorridos(lista):
+  lista_anos = list(set([x['ano_publicado'] for x in lista]))
+  return sorted([ano_qtd_livros(lista, x)[0] for x in lista_anos if ano_qtd_livros(lista, x)[1] >=5], reverse=True)
+
 ##
 #----------Sobre a publicadora
 #
 #
-def igual_publicadora(lista, publicadora):
+def publicadora_igual(lista, publicadora):
   return list (filter(lambda x: x['publicado_por'] == publicadora , lista) )
 
+def publicadora_lista(lista):
+  return list( set([pos['publicado_por'] for pos in lista]))
 
+def publicadora_lista_livros(lista,publicadora):
+  lista_livros = publicadora_igual(lista, publicadora)
+  #transforma a key 'livro' no dicionario lista_livros em um conjunto 
+  #para evitar repeticoes de livro
+  return list(set([x['livro'] for x in lista_livros]))
 
-#######################
-#######################
-########TESTES#########
-#######################
-#######################
+"""
+----------------------
+----------------------
+--------TESTES--------
+----------------------
+----------------------
+"""
+
 res = getRes(results)
 #print(list(res))
 #print("\n\n------------------------------------------\n\n")
@@ -221,8 +256,12 @@ res = getRes(results)
 #print(autor_lista_livros(res,"Terry Pratchett"))
 #print(list(res))
 #print(autor_qtd_livros(res,"Terry Pratchett"))
-print(autor_lista_bem_sucedidos(res))
-print(autor_contato_com_publicadora(res,"Terry Pratchett" ))
-print(autor_lista_livros(res, 'Mary Hoffman'))
-print(livro_lista_republicados(res))
+#print(autor_lista_bem_sucedidos(res))
+#print(autor_contato_com_publicadora(res,"Terry Pratchett" ))
+#print(autor_lista_livros(res, 'Mary Hoffman'))
+#print(livro_lista_republicados(res))
 #print(autor_lista(res))
+#print(ano_lista_livros(res, 2007))
+#print(ano_qtd_livros(res, 2007))
+#print(ano_lista_concorridos(res))
+print(publicadora_lista_livros(res,"Del Rey Books"))

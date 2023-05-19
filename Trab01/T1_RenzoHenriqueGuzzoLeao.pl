@@ -68,19 +68,20 @@ livros_de_fantasia(Nome, Autor, Ano, Publicadora) :-
 
 /*Autor do Livro tal*/
 autor_de(Autor,Livro):-
-    livros_de_fantasia(Livro, Autor,_,_).
+    distinct([Livro,Autor], (livros_de_fantasia(Livro, Autor,_,_))).
+
 
 /*Autor fez livro pra tal publicadora*/
 autor_fez_publicadora(Autor,Publicadora):-
-    livros_de_fantasia(_, Autor,_,Publicadora).
-   
+    distinct([Autor,Publicadora], (livros_de_fantasia(_, Autor,_,Publicadora))).
+
 /*Quantidade de livros do autor*/
 quantidade_de_livros_do_autor(Autor,Count):-
     distinct([Autor], ( autor_de(Autor,_))),
     aggregate_all(count, (autor_de(Autor,_)), Count).
 
 /*Autor Possui mais de 5 livros*/
-autor_bem_sucedido(Autor):-
+autor_bem_sucedido(Autor, Count):-
 quantidade_de_livros_do_autor(Autor,Count), Count @> 5.
 
 /*Lista de livros do autor*/
@@ -97,19 +98,18 @@ autor_com_livros(Autor, Lista_de_livros):-
 
 /*Livro1 e Livro2 possuem o mesmo autor*/
 mesmo_autor(Livro1,Livro2):-
-    livros_de_fantasia(Livro1,Autor,_,_),
-    livros_de_fantasia(Livro2,Autor,_,_), dif(Livro1,Livro2).
+    distinct(
+        	[Livro1,Autor,Livro2],
+        	(livros_de_fantasia(Livro1,Autor,_,_),livros_de_fantasia(Livro2,Autor,_,_))
+        	), 
+    dif(Livro1,Livro2).
 
 /*Livro1 e Livro2 possuem mesma publicadora*/
 mesma_publicadora(Livro1,Livro2):-
-    publicadora_de(Publicadora,Livro1),publicadora_de(Publicadora,Livro2),
-    dif(Livro1,Livro2).
-
-/*Livros possuem concorrencia: Lancaram no mesmo ano e possuem
- * a mesma publicadora*/
-concorrencia(Livro1,Livro2):-
-    mesma_publicadora(Livro1,Livro2),
-    ano_do_livro(Ano,Livro1),ano_do_livro(Ano,Livro2),
+    distinct(
+        	[Publicadora,Livro1,Livro2], 
+        	(publicadora_de(Publicadora,Livro1),publicadora_de(Publicadora,Livro2)
+        	)),
     dif(Livro1,Livro2).
 
 /*Livro foi republicado: Possui mais de 1 ano de publicacao
@@ -118,7 +118,7 @@ republicado(Livro):-
     distinct([Livro], (livros_de_fantasia(Livro,_,_,_))),
     ano_do_livro(Ano1,Livro) , ano_do_livro(Ano2,Livro),
     Ano1 @> Ano2.
-
+%livro pode aparecer varias vezes por ter sido republicado muitas vezes
 
 
 /**Sobre o ano
@@ -128,12 +128,11 @@ republicado(Livro):-
  *
  * ***/
 
-/*Talvez dar um jeito de unificar todos os tipos de data para um calculo melhor
- * */
-
 /*Ano em que o Livro foi publicado */
 ano_do_livro(Ano, Livro):-
-    livros_de_fantasia(Livro,_,Ano,_).
+    distinct([Livro,Ano], (livros_de_fantasia(Livro,_,Ano,_))).
+
+
 
 /*Ano e a sua lista de livros*/
 ano_lista_de_livros(Ano,Lista_de_livros):-
@@ -141,20 +140,29 @@ ano_lista_de_livros(Ano,Lista_de_livros):-
           distinct([Ano,Livro], (ano_do_livro(Ano,Livro))),
           Lista_de_livros).
 
+
 /*Ano e a sua quantidade de livros lancado*/
 ano_com_livros(Ano,Count):-
     distinct([Ano], (ano_do_livro(Ano,_))),
     aggregate_all(count, (ano_do_livro(Ano, _)), Count).
 
+
 /*Ano em que teve mais de 5 livros*/
 ano_concorrido(Ano):-
     ano_com_livros(Ano,Count), Count @> 5.
 
+
 /*Lista de anos de publicacao de um livro*/
 livro_anos_de_publicacao(Livro, Lista):-
     bagof(Ano,
-          ( distinct([Ano], (republicado(Livro), ano_do_livro(Ano,Livro)))),
+          (distinct([Livro,Ano], (republicado(Livro), ano_do_livro(Ano,Livro))) ),
           Lista).
+
+% livro_anos_de_publicacao("The Lord of the Rings", Lista).
+% livro_anos_de_publicacao(Livro, [2007|_]).
+
+% acima nao eh uma consulta muito boa pois necessita que 2007 seja o cabeca da lista
+% mas eh uma consulta boa
 
 /**Sobre a publicadora
  *
@@ -165,7 +173,10 @@ livro_anos_de_publicacao(Livro, Lista):-
 
 /* É Publicadora do Livro*/
 publicadora_de(Publicadora, Livro):-
-livros_de_fantasia(Livro, _,_,Publicadora),
+	distinct(
+        [Livro,Publicadora], 
+        (livros_de_fantasia(Livro, _,_,Publicadora))
+        ),
     dif(Publicadora, '$null$').
 
 /*Lista de livros da Publicadora*/
@@ -202,9 +213,14 @@ publicadora_famosa_entre_autores(Publicadora):-
 
 
 /** <examples>
+?- autor_de(Autor,_).
 ?- autor_de("Terry Pratchett", X).
 ?- autor_com_livros("Terry Pratchett", Lista_de_livros).
-?- autor_bem_sucedido(Autor).
+?- autor_bem_sucedido(Autor, Count).
+
+?- republicado(Livro).
+?- mesma_publicadora(Livro1,Livro2).
+?- mesma_publicadora( "Pyramids",Livro2).
 
 ?- ano_com_livros(Ano,6).
 ?- ano_lista_de_livros(Ano,Lista_de_livros).

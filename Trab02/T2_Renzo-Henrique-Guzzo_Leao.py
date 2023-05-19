@@ -1,4 +1,5 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
+from functools import reduce
 
 #set endpoint
 sparql = SPARQLWrapper("http://dbpedia.org/sparql") 
@@ -15,18 +16,18 @@ sparql.setQuery("""
                 ?Book dbp:author ?Autor__.
                 ?Autor__ foaf:name ?autor_.
             
-                optional{
-                    {
-                        ?Book dbp:publisher ?Publicadora_.
-                        ?Publicadora_ rdfs:label ?publicado_por.
-                        FILTER ( lang(?publicado_por) = 'en' && ?publicado_por!= ''@en )
-                    }
-                    UNION
-                    {
-                        ?Book dbp:publisher ?publicado_por.   
-                        FILTER ( lang(?publicado_por) = 'en' && ?publicado_por!= ''@en )
-                    }
+                
+                {
+                  ?Book dbp:publisher ?Publicadora_.
+                  ?Publicadora_ rdfs:label ?publicado_por.
+                  FILTER ( lang(?publicado_por) = 'en' && ?publicado_por!= ''@en )
                 }
+                UNION
+                {
+                  ?Book dbp:publisher ?publicado_por.   
+                  FILTER ( lang(?publicado_por) = 'en' && ?publicado_por!= ''@en )
+                }
+                
 
                 {
                     ?Book dbp:pubDate ?ano_publicacao.
@@ -110,8 +111,7 @@ if results:
                      map ( lambda key: (key, item[key]['value']) 
                            , item.keys() )
              ) , VALUES)
-print(list(res))
-
+#print(list(res))
 
 def getRes(resDcit):
   VALUES = resDcit['results']['bindings']
@@ -120,17 +120,109 @@ def getRes(resDcit):
                            , item.keys() )
              ) , VALUES) )
 
-def public_apos(lista, data):
-  return list( filter(lambda x: x['ano_publicado']>data, lista) )
 
-def filtra_nome(lista, nome):
+def print_list_melhorado(lista, message):
+  print("-----" +message+ "-----")
+  print('\n'.join('{}: {}'.format(*k) for k in enumerate(lista)))
+
+#FUNCOES DIVIDIDAS POR INFORMACAO
+##
+#----------Sobre o autor
+#
+#
+def autor_lista(lista):
+  return list( set([pos['autor_'] for pos in lista]))
+def autor_filtra_nome(lista, nome):
   return list (filter(lambda x: x['autor_'].__contains__(nome) , lista) )
+def autor_igual(lista, nome):
+  return list (filter(lambda x: x['autor_'] == nome, lista) )
 
-def filtra_publicadora(lista, publicadora):
-  return list (filter(lambda x: x['publicado_por'].__contains__(publicadora) , lista) )
+def autor_contato_com_publicadora(lista, nome):
+  #lista_publicadoras na verdade sao os dicionarios que aquele autor aparece
+  lista_publicadoras = filter(lambda x: x['autor_'] == nome, lista)
+  #obtendo as publicadoras(sem repeticao de nome)
+  return list(set([x['publicado_por'] for x in lista_publicadoras]))
 
+def autor_lista_livros(lista, nome):
+  #lista_livros na verdade sao os dicionarios que aquele autor aparece
+  lista_livros = filter(lambda x: x['autor_'] == nome, lista)
+  #transforma a key 'livro' no dicionario lista_livros em um conjunto 
+  #para evitar repeticoes de nome de livro
+  return list(set([x['livro'] for x in lista_livros]))
+
+def autor_qtd_livros(lista,nome):
+  #obtem a lista de livros do autor referente a nome, calcula o tamanho e entao
+  #faz uma tupla com (nome, count), sendo count a quantidade de livros do autor
+  return (nome,len(autor_lista_livros(lista,nome)))
+
+def autor_lista_bem_sucedidos(lista):
+    lista_autores = [autor_qtd_livros(lista,posicao['autor_']) for posicao in lista]
+    #print(lista_autores)
+    return list(set(filter(lambda x: x[1] >5, lista_autores)))
+
+##
+#----------Sobre o livro
+#
+#
+def livro_anos_publicados(lista, livro):
+  #lista_livros na verdade sao os dicionarios que aquele livro aparece
+  lista_livros = filter(lambda x: x['livro'] == livro, lista)
+
+  #transforma a key 'ano_publicacao' no dicionario lista_livros em um conjunto 
+  #para evitar repeticoes de ano de publicacao
+  return list(set([x['ano_publicado'] for x in lista_livros]))
+
+def livro_qtd_anos_publicados(lista, livro):
+  return (livro, len(livro_anos_publicados(lista, livro)))
+
+def livro_lista_republicados(lista):
+  #lista_publicadoras na verdade sao os dicionarios que aquele autor aparece
+  lista_publicadoras = [(posicao['livro'], livro_anos_publicados(lista,posicao['livro'])) for posicao in lista]
+  
+  lista_republicados = list(filter(lambda x: len(x[1]) > 1, lista_publicadoras))
+  #retira as duplicatas
+  return [x for i, x in enumerate(lista_republicados) if x not in lista_republicados[:i]]
+##
+#----------Sobre o ano
+#
+#
+def public_apos_ano(lista, data):
+  return list( filter(lambda x: x['ano_publicado']>data, lista) )
+def public_antes_ano(lista, data):
+  return list( filter(lambda x: x['ano_publicado']<data, lista) )
+def public_mesmo_ano(lista, data):
+  return list( filter(lambda x: x['ano_publicado']<data, lista) )
+##
+#----------Sobre a publicadora
+#
+#
+def igual_publicadora(lista, publicadora):
+  return list (filter(lambda x: x['publicado_por'] == publicadora , lista) )
+
+
+
+#######################
+#######################
+########TESTES#########
+#######################
+#######################
 res = getRes(results)
-#print(filtra_nome(res, 'John'))
-print("\n\n------------------------------------------\n\n")
+#print(list(res))
+#print("\n\n------------------------------------------\n\n")
+#print(filtra_nome_autor(res, 'John'))
+#print("\n\n------------------------------------------\n\n")
 #print(public_apos(res, '2015'))
-print(filtra_publicadora(res, 'Harper Paperbacks'))
+#print(res[0].keys())
+#print(res[0]['publicado_por'])
+#print(igual_publicadora(res, 'Harper Paperbacks'))
+#print_list_melhorado(igual_publicadora(res, 'Harper Paperbacks'), 'Mesma publicadora')
+
+
+#print(autor_lista_livros(res,"Terry Pratchett"))
+#print(list(res))
+#print(autor_qtd_livros(res,"Terry Pratchett"))
+print(autor_lista_bem_sucedidos(res))
+print(autor_contato_com_publicadora(res,"Terry Pratchett" ))
+print(autor_lista_livros(res, 'Mary Hoffman'))
+print(livro_lista_republicados(res))
+#print(autor_lista(res))

@@ -135,106 +135,117 @@ def print_list_melhorado(lista, message):
 #----------Sobre o autor
 #
 #
+# Retorna uma lista de nomes de autor únicos a partir da lista de dicionários
 def autor_lista(lista):
-  return list( set([pos['autor_'] for pos in lista]))
+  return list(set([pos['autor_'] for pos in lista]))
 
+# Filtra a lista de dicionários para incluir apenas entradas em que o nome do autor contém o nome especificado
 def autor_filtra_nome(lista, nome):
-  return list (filter(lambda x: x['autor_'].__contains__(nome) , lista) )
-def autor_igual(lista, nome):
-  return list (filter(lambda x: x['autor_'] == nome, lista) )
+  return list(filter(lambda x: x['autor_'].__contains__(nome), lista))
 
+# Filtra a lista de dicionários para incluir apenas entradas em que o nome do autor é exatamente igual ao nome especificado
+def autor_igual(lista, nome):
+  return list(filter(lambda x: x['autor_'] == nome, lista))
+
+# Retorna uma lista de nomes de editora únicos com as quais o autor especificado está associado
 def autor_contato_com_publicadora(lista, nome):
-  #lista_publicadoras na verdade sao os dicionarios que aquele autor aparece
+  # Lista de dicionários em que o autor aparece
   lista_publicadoras = filter(lambda x: x['autor_'] == nome, lista)
-  #obtendo as publicadoras(sem repeticao de nome)
+  # Obtendo as editoras (sem repetição de nome)
   return list(set([x['publicado_por'] for x in lista_publicadoras]))
 
+# Retorna uma lista de títulos de livros únicos associados ao autor especificado
 def autor_lista_livros(lista, nome):
-  #lista_livros na verdade sao os dicionarios que aquele autor aparece
+  # Lista de dicionários em que o autor aparece
   lista_livros = filter(lambda x: x['autor_'] == nome, lista)
-  #transforma a key 'livro' no dicionario lista_livros em um conjunto 
-  #para evitar repeticoes de nome de livro
+  # Transforma a chave 'livro' nos dicionários em um conjunto para evitar repetições de nome de livro
   return list(set([x['livro'] for x in lista_livros]))
 
-def autor_qtd_livros(lista,nome):
-  #obtem a lista de livros do autor referente a nome, calcula o tamanho e entao
-  #faz uma tupla com (nome, count), sendo count a quantidade de livros do autor
-  return (nome,len(autor_lista_livros(lista,nome)))
+# Retorna uma tupla contendo o nome do autor e a contagem de livros associados a esse autor
+def autor_qtd_livros(lista, nome):
+  # Obtém a lista de livros do autor especificado por 'nome', calcula o tamanho e retorna uma tupla (nome, count),
+  # em que count é a quantidade de livros do autor
+  return (nome, len(autor_lista_livros(lista, nome)))
 
+# Retorna uma lista de autores que escreveram mais de 5 livros
 def autor_lista_bem_sucedidos(lista):
-    lista_autores = [autor_qtd_livros(lista,posicao['autor_']) for posicao in lista]
-    #print(lista_autores)
-    return list(set(filter(lambda x: x[1] >5, lista_autores)))
+  lista_autores = [autor_qtd_livros(lista, posicao['autor_']) for posicao in lista]
+  return list(set(filter(lambda x: x[1] > 5, lista_autores)))
 
+# Retorna a quantidade total de páginas escritas pelo autor especificado
 def autor_quantidade_paginas_escritas(lista, nome):
   lista_tuplas = pagina_lista_livros_com_pagina_e_autor(lista)
-  return (nome,reduce(lambda x, y: x + int(y[2]) if  y[0] == nome else x, lista_tuplas, 0))
+  return (nome, reduce(lambda x, y: x + int(y[2]) if y[0] == nome else x, lista_tuplas, 0))
+
 ##
 #----------Sobre o livro
 #
 #
+# Retorna uma lista de anos de publicação únicos para o título do livro especificado
 def livro_anos_publicados(lista, livro):
-  #lista_livros na verdade sao os dicionarios que aquele livro aparece
   lista_livros = filter(lambda x: x['livro'] == livro, lista)
-
-  #transforma a key 'ano_publicacao' no dicionario lista_livros em um conjunto 
-  #para evitar repeticoes de ano de publicacao
   return list(set([x['ano_publicado'] for x in lista_livros]))
 
+# Retorna a quantidade de anos de publicação para o título do livro especificado
 def livro_qtd_anos_publicados(lista, livro):
   return (livro, len(livro_anos_publicados(lista, livro)))
 
+# Retorna uma lista de livros que foram publicados em múltiplos anos
 def livro_lista_republicados(lista):
-  #lista_publicadoras na verdade sao os dicionarios que aquele autor aparece
-  lista_publicadoras = [(posicao['livro'], livro_anos_publicados(lista,posicao['livro'])) for posicao in lista]
-  
+  lista_publicadoras = [(posicao['livro'], livro_anos_publicados(lista, posicao['livro'])) for posicao in lista]
   lista_republicados = list(filter(lambda x: len(x[1]) > 1, lista_publicadoras))
-  #retira as duplicatas
+  # Remove as duplicatas da lista
   return [x for i, x in enumerate(lista_republicados) if x not in lista_republicados[:i]]
 
 ##
 #----------Sobre o ano
 #
 #
+# Retorna uma lista de anos de publicação únicos a partir da lista de dicionários
 def ano_publicados(lista):
-  #transforma a key 'ano_publicado' dos dicionarios da lista 
-  #para evitar repeticoes de ano de publicacao
   return list(set([x['ano_publicado'] for x in lista]))
 
+# Filtra a lista de dicionários para incluir apenas entradas publicadas após o ano especificado
 def ano_public_apos_ano(lista, data):
-  return list( filter(lambda x: int(x['ano_publicado'])>data, lista) )
-def ano_public_antes_ano(lista, data):
-  return list( filter(lambda x: int(x['ano_publicado'])<data, lista) )
-def ano_public_mesmo_ano(lista, data):
-  return list( filter(lambda x: int(x['ano_publicado'])==data, lista) )
+  return list(filter(lambda x: int(x['ano_publicado']) > data, lista))
 
-def ano_lista_livros(lista,data):
+# Filtra a lista de dicionários para incluir apenas entradas publicadas antes do ano especificado
+def ano_public_antes_ano(lista, data):
+  return list(filter(lambda x: int(x['ano_publicado']) < data, lista))
+
+# Filtra a lista de dicionários para incluir apenas entradas publicadas no ano especificado
+def ano_public_mesmo_ano(lista, data):
+  return list(filter(lambda x: int(x['ano_publicado']) == data, lista))
+
+# Retorna uma lista de títulos de livros únicos publicados no ano especificado
+def ano_lista_livros(lista, data):
   lista_livros = ano_public_mesmo_ano(lista, data)
-  #transforma a key 'livro' no dicionario lista_livros em um conjunto 
-  #para evitar repeticoes de livro
   return list(set([x['livro'] for x in lista_livros]))
 
-def ano_qtd_livros(lista,data):
-  return (data,len(ano_lista_livros(lista,data)))
+# Retorna uma tupla contendo o ano e a contagem de livros publicados nesse ano
+def ano_qtd_livros(lista, data):
+  return (data, len(ano_lista_livros(lista, data)))
 
+# Retorna uma lista de anos de publicação com pelo menos 5 livros publicados, em ordem decrescente
 def ano_lista_concorridos(lista):
   lista_anos = list(set([x['ano_publicado'] for x in lista]))
-  return sorted([ano_qtd_livros(lista, x)[0] for x in lista_anos if ano_qtd_livros(lista, x)[1] >=5], reverse=True)
+  return sorted([ano_qtd_livros(lista, x)[0] for x in lista_anos if ano_qtd_livros(lista, x)[1] >= 5], reverse=True)
 
 ##
 #----------Sobre a publicadora
 #
 #
+# Filtra a lista de dicionários para incluir apenas entradas em que o nome da editora é exatamente igual ao especificado
 def publicadora_igual(lista, publicadora):
-  return list (filter(lambda x: x['publicado_por'] == publicadora , lista) )
+  return list(filter(lambda x: x['publicado_por'] == publicadora, lista))
 
+# Retorna uma lista de nomes de editora únicos a partir da lista de dicionários
 def publicadora_lista(lista):
-  return list( set([pos['publicado_por'] for pos in lista]))
+  return list(set([pos['publicado_por'] for pos in lista]))
 
-def publicadora_lista_livros(lista,publicadora):
+# Retorna uma lista de títulos de livros únicos associados à editora especificada
+def publicadora_lista_livros(lista, publicadora):
   lista_livros = publicadora_igual(lista, publicadora)
-  #transforma a key 'livro' no dicionario lista_livros em um conjunto 
-  #para evitar repeticoes de livro
   return list(set([x['livro'] for x in lista_livros]))
 
 
@@ -242,17 +253,21 @@ def publicadora_lista_livros(lista,publicadora):
 #----------Sobre o numero de paginas
 #
 #
+# Retorna uma lista de tuplas (livro, pages) representando os títulos dos livros e o número de páginas a partir da lista de dicionários
 def pagina_lista_livros_com_pagina(lista):
-  return list( set([ ( pos['livro'], pos['pages'] ) for pos in lista]))
+  return list(set([(pos['livro'], pos['pages']) for pos in lista]))
 
+# Retorna uma lista de tuplas (livro, pages) representando os títulos dos livros e o número de páginas usando a função map
 def pagina_lista_livros_com_pagina_usandoMap(lista):
-  return list( set(map( lambda pos: (pos['livro'], pos['pages']) ,lista)))
+  return list(set(map(lambda pos: (pos['livro'], pos['pages']), lista)))
 
+# Retorna uma lista de tuplas (autor, livro, pages) representando os autores, títulos dos livros e o número de páginas a partir da lista de dicionários
 def pagina_lista_livros_com_pagina_e_autor(lista):
-  return list( set([ ( pos['autor_'],pos['livro'], pos['pages'] ) for pos in lista]))
+  return list(set([(pos['autor_'], pos['livro'], pos['pages']) for pos in lista]))
 
+# Retorna uma lista de tuplas (livro, pages) representando os títulos dos livros e o número de páginas, onde o número de páginas é maior que N
 def pagina_lista_livros_paginas_maior_que_N(lista, n):
-  return [tuplas for tuplas in pagina_lista_livros_com_pagina(lista) if(int(tuplas[1])>n)]
+  return [tuplas for tuplas in pagina_lista_livros_com_pagina(lista) if int(tuplas[1]) > n]
 
 
 """
@@ -263,34 +278,34 @@ def pagina_lista_livros_paginas_maior_que_N(lista, n):
 ----------------------
 """
 
-res = getRes(results)
-#print(list(res))
+resultados = getRes(results)
+#print(list(results))
 #print("\n\n------------------------------------------\n\n")
-#print(filtra_nome_autor(res, 'John'))
+#print(filtra_nome_autor(results, 'John'))
 #print("\n\n------------------------------------------\n\n")
-#print(public_apos(res, '2015'))
+#print(public_apos(results, '2015'))
 #print(res[0].keys())
 #print(res[0]['publicado_por'])
-#print(igual_publicadora(res, 'Harper Paperbacks'))
-#print_list_melhorado(igual_publicadora(res, 'Harper Paperbacks'), 'Mesma publicadora')
+#print(igual_publicadora(results, 'Harper Paperbacks'))
+#print_list_melhorado(igual_publicadora(results, 'Harper Paperbacks'), 'Mesma publicadora')
 
 
-#print(autor_lista_livros(res,"Terry Pratchett"))
-#print(list(res))
-#print(autor_qtd_livros(res,"Terry Pratchett"))
-#print(autor_lista_bem_sucedidos(res))
-#print(autor_contato_com_publicadora(res,"Terry Pratchett" ))
-#print(autor_lista_livros(res, 'Robin DiAngelo'))
-#print(livro_lista_republicados(res))
-#print(autor_lista(res))
-#print(ano_lista_livros(res, 2007))
-#print(ano_qtd_livros(res, 2007))
-#print(ano_lista_concorridos(res))
-#print(publicadora_lista_livros(res,"Del Rey Books"))
-#print(pagina_lista_livros_paginas_maior_que_N(res, 1000))
-#print(autor_quantidade_paginas_escritas(res, 'Robin DiAngelo'))
+#print(autor_lista_livros(results,"Terry Pratchett"))
+#print(list(results))
+#print(autor_qtd_livros(results,"Terry Pratchett"))
+#print(autor_lista_bem_sucedidos(results))
+#print(autor_contato_com_publicadora(results,"Terry Pratchett" ))
+#print(autor_lista_livros(results, 'Robin DiAngelo'))
+#print(livro_lista_republicados(results))
+#print(autor_lista(results))
+#print(ano_lista_livros(results, 2007))
+#print(ano_qtd_livros(results, 2007))
+#print(ano_lista_concorridos(results))
+#print(publicadora_lista_livros(results,"Del Rey Books"))
+#print(pagina_lista_livros_paginas_maior_que_N(results, 1000))
+#print(autor_quantidade_paginas_escritas(results, 'Robin DiAngelo'))
 
-print(pagina_lista_livros_com_pagina_usandoMap(res) == pagina_lista_livros_com_pagina(res))
+print(pagina_lista_livros_com_pagina_usandoMap(results) == pagina_lista_livros_com_pagina(results))
 
 
 ##TO_DO: modificar para pegar somente 1 resultado de página 

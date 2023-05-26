@@ -146,10 +146,10 @@ def getRes(resDcit):
 def print_list_melhorado(lista):
   print('\n'.join('{}: {}'.format(*k) for k in enumerate(lista)))
 
-##
+############################################
 #----------Sobre o autor
-#
-#
+###########################################
+###########################################
 #lista de todos os autores
 def autor_lista(lista):
   return list( set([pos['autor_'] for pos in lista]))
@@ -193,10 +193,18 @@ def autor_quantidade_paginas_escritas(lista, nome):
   lista_tuplas = pagina_lista_livros_com_pagina_e_autor(lista)
   return (nome,reduce(lambda x, y: x + int(y[2]) if  y[0] == nome else x, lista_tuplas, 0))
 
-##
+############################################
 #----------Sobre o livro
-#
-#
+###########################################
+###########################################
+
+#retorna os resultados que possuem *livro* em alguma parte do seu nome
+def livro_filtra_nome(lista, livro):
+  return list (filter(lambda x: x['livro'].__contains__(livro) , lista))
+
+#retorna os resultados pesquisados pelo livro do livro
+def livro_igual(lista, livro):
+  return list (filter(lambda x: x['livro'] == livro, lista) )
 
 #retorna a lista de anos publicados de um dado livro
 def livro_anos_publicados(lista, livro):
@@ -220,10 +228,10 @@ def livro_lista_republicados(lista):
   #retira as duplicatas
   return [x for i, x in enumerate(lista_republicados) if x not in lista_republicados[:i]]
 
-##
+############################################
 #----------Sobre o ano
-#
-#
+###########################################
+###########################################
 
 #retorna a lista de anos em que houve ao menos uma publicacao de livro
 def ano_publicados(lista):
@@ -261,11 +269,12 @@ def ano_lista_maior_N(lista, n):
   lista_anos = list(set([x['ano_publicado'] for x in lista]))
   return sorted([ano_qtd_livros(lista, x)[0] for x in lista_anos if ano_qtd_livros(lista, x)[1] >=n], reverse=True)
 
-##
+############################################
 #----------Sobre a publicadora
-#
-#
-#lista de autores de que possuem *autor* em alguma parte do seu nome
+###########################################
+###########################################
+
+#retorna os resultados que possuem *publicadora* em alguma parte do seu nome
 def publicadora_filtra_nome(lista, publicadora):
   return list (filter(lambda x: x['autor_'].__contains__(publicadora) , lista) )
 
@@ -286,10 +295,11 @@ def publicadora_lista_livros(lista,publicadora):
 
 
 
-##
+############################################
 #----------Sobre o numero de paginas
-#
-#
+###########################################
+###########################################
+
 #retorna os resultados que possuem o mais paginas que pag
 def pagina_livro_mais_quantidade_pagina(lista, pag):
   return list( filter(lambda x: int(x['pages']) > pag, lista) )

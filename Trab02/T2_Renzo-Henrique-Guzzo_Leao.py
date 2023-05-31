@@ -154,6 +154,11 @@ def print_list_melhorado(lista):
 def autor_lista(lista):
   return list( set([pos['autor_'] for pos in lista]))
 
+#lista de todos os autores usando map
+def autor_lista_map(lista):
+  return list( set(map(lambda pos: pos['autor_'], lista)))
+
+
 #lista de autores de que possuem *autor* em alguma parte do seu nome
 def autor_filtra_nome(lista, autor):
   return list (filter(lambda x: x['autor_'].__contains__(autor) , lista) )
@@ -166,7 +171,7 @@ def autor_contato_com_publicadora(lista, autor):
   #lista_publicadoras na verdade sao os dicionarios que aquele autor aparece
   lista_publicadoras = filter(lambda x: x['autor_'] == autor, lista)
   #obtendo as publicadoras(sem repeticao de autor)
-  return list(set([x['publicado_por'] for x in lista_publicadoras]))
+  return list(set(map(lambda x: x['publicado_por'], lista_publicadoras)))
 
 #retorna a lista de um dado autor
 def autor_lista_livros(lista, autor):
@@ -174,7 +179,7 @@ def autor_lista_livros(lista, autor):
   lista_livros = filter(lambda x: x['autor_'] == autor, lista)
   #transforma a key 'livro' no dicionario lista_livros em um conjunto 
   #para evitar repeticoes de autor de livro
-  return list(set([x['livro'] for x in lista_livros]))
+  return list(set(map(lambda x: x['livro'], lista_livros)))
 
 #retorna a quantidade de livros de um dado autor
 def autor_qtd_livros(lista,autor):
@@ -213,7 +218,7 @@ def livro_anos_publicados(lista, livro):
 
   #transforma a key 'ano_publicacao' no dicionario lista_livros em um conjunto 
   #para evitar repeticoes de ano de publicacao
-  return list(set([x['ano_publicado'] for x in lista_livros]))
+  return list(set(map(lambda x: x['ano_publicado'], lista_livros)))
 
 #retorna a quantidade de anos publicados de um livro
 def livro_qtd_anos_publicados(lista, livro):
@@ -238,7 +243,7 @@ def ano_publicados(lista):
   
   #transforma a key 'ano_publicado' dos dicionarios da lista 
   #para evitar repeticoes de ano de publicacao
-  return list(set([x['ano_publicado'] for x in lista]))
+  return list(set(map(lambda x: x['ano_publicado'], lista)))
 
 #retorna os resultados que possuem o ano de publicacao apos data
 def ano_public_apos_ano(lista, data):
@@ -258,7 +263,7 @@ def ano_lista_livros(lista,data):
   lista_livros = ano_public_mesmo_ano(lista, data)
   #transforma a key 'livro' no dicionario lista_livros em um conjunto 
   #para evitar repeticoes de livro
-  return list(set([x['livro'] for x in lista_livros]))
+  return list(set(map(lambda x: x['livro'], lista_livros)))
 
 #retorna a quantidade de livros de um dado ano
 def ano_qtd_livros(lista,data):
@@ -266,7 +271,7 @@ def ano_qtd_livros(lista,data):
 
 #retorna a lista de anos em que houve mais de N publicacoes (ordenado)
 def ano_lista_maior_N(lista, n):
-  lista_anos = list(set([x['ano_publicado'] for x in lista]))
+  lista_anos = list(set(map(lambda x: x['ano_publicado'], lista)))
   return sorted([ano_qtd_livros(lista, x)[0] for x in lista_anos if ano_qtd_livros(lista, x)[1] >=n], reverse=True)
 
 ############################################
@@ -284,14 +289,14 @@ def publicadora_igual(lista, publicadora):
 
 #retorna a lista de publicadoras
 def publicadora_lista(lista):
-  return list( set([pos['publicado_por'] for pos in lista]))
+  return list( set(map(lambda pos: pos['publicado_por'], lista)))
 
 #retorna a lista de livros de uma dada publicadora
 def publicadora_lista_livros(lista,publicadora):
   lista_livros = publicadora_igual(lista, publicadora)
   #transforma a key 'livro' no dicionario lista_livros em um conjunto 
   #para evitar repeticoes de livro
-  return list(set([x['livro'] for x in lista_livros]))
+  return list(set(map(lambda x: x['livro'], lista_livros)))
 
 
 
@@ -315,16 +320,12 @@ def ano_public_entre_data1_data2(lista, data1, data2):
 
 #retorna uma lista de tuplas contendo (nome_do_livro, paginas)
 def pagina_lista_livros_com_pagina(lista):
-  return list( set([ ( pos['livro'], pos['pages'] ) for pos in lista]))
-
-#retorna uma lista de tuplas contendo (nome_do_livro, paginas), usando map
-def pagina_lista_livros_com_pagina_usandoMap(lista):
-  return list( set(map( lambda pos: (pos['livro'], pos['pages']) ,lista)))
+  return list( set(map(lambda pos: (pos['livro'], pos['pages']), lista)))
 
 
 #retorna uma lista de tuplas contendo (autor, nome_do_livro, paginas)
 def pagina_lista_livros_com_pagina_e_autor(lista):
-  return list( set([ ( pos['autor_'],pos['livro'], pos['pages'] ) for pos in lista]))
+  return list( set(map(lambda pos: (pos['autor_'], pos['livro'], pos['pages']), lista)))
 
 #retorna uma lista de tuplas contendo os livros que possuem mais que n paginas
 def pagina_lista_livros_paginas_maior_que_N(lista, n):
@@ -374,10 +375,6 @@ def meu_testador_1(res):
 
 #testador de funcoes implementadas
 def meu_testador_2(res):
-  print("Metodo map e comprehension sao iguais para lista de livros com pagina? ", set(pagina_lista_livros_com_pagina_usandoMap(res)) == set(pagina_lista_livros_com_pagina(res)))
-
-#testador de funcoes implementadas
-def meu_testador_3(res):
 
   autor_ex = "Mary Renault"
   autor_filtra = "Mary"
@@ -390,7 +387,7 @@ def meu_testador_3(res):
   print_list_melhorado(autor_filtra_nome(res, autor_filtra))
 
 #combinando funcoes implementadas
-def meu_testador_4(res):
+def meu_testador_3(res):
   autor_filtra = "John"
   ano_ex = 2015
   pagina_ex = 300
@@ -406,17 +403,13 @@ def meu_testador_4(res):
   print("\nFiltrando resultados de nome do autor com ",autor_filtra, ", apos o ano ", ano_ex, " e com mais paginas que ", pagina_ex, ":")
   print_list_melhorado( lista_autor_ano_pagina)
 
-
+    
 ##########################################
 ##########################################
 ##########################################
 ##########TESTES RECOMENDADOS#############
 #meu_testador_1(resultados_query)
-meu_testador_2(resultados_query)
 #meu_testador_3(resultados_query)
 #meu_testador_4(resultados_query)
 
 
-
-
-#transformar alguns comprehension para map

@@ -1,11 +1,6 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 from functools import reduce
-import time
 
-
-
-# Início da contagem de tempo
-start_time__query = time.time()
 
 #set endpoint
 sparql = SPARQLWrapper("http://dbpedia.org/sparql") 
@@ -158,10 +153,10 @@ def autor_lista(lista):
 def autor_lista_map(lista):
   return list( set(map(lambda pos: pos['autor_'], lista)))
 
-
 #lista de autores de que possuem *autor* em alguma parte do seu nome
 def autor_filtra_nome(lista, autor):
   return list (filter(lambda x: x['autor_'].__contains__(autor) , lista) )
+
 #retorna os resultados pesquisados pelo autor do autor
 def autor_igual(lista, autor):
   return list (filter(lambda x: x['autor_'] == autor, lista) )
@@ -272,7 +267,7 @@ def ano_qtd_livros(lista,data):
 #retorna a lista de anos em que houve mais de N publicacoes (ordenado)
 def ano_lista_maior_N(lista, n):
   lista_anos = list(set(map(lambda x: x['ano_publicado'], lista)))
-  return sorted([ano_qtd_livros(lista, x)[0] for x in lista_anos if ano_qtd_livros(lista, x)[1] >=n], reverse=True)
+  return sorted([ano_qtd_livros(lista, x)[0] for x in lista_anos if ano_qtd_livros(lista, int(x))[1] >=n], reverse=True)
 
 ############################################
 #----------Sobre a publicadora
@@ -353,14 +348,6 @@ def pagina_lista_livros_paginas_entre_N_M(lista, n, m):
 
 resultados_query = getRes(results)
 
-# Fim da contagem de tempo da query
-end_time__query = time.time()
-# Impressão do tempo de execução
-#print(f"Tempo de execução da query: {end_time__query-start_time__query:.3f} segundos")
-
-
-
-
 
 #testador de funcoes implementadas
 def meu_testador_1(res):
@@ -370,7 +357,9 @@ def meu_testador_1(res):
   quantidade_ex = 50
 
   print("\nLista de livros de ", autor_ex, ":\n", autor_lista_livros(res,autor_ex))
+  print("\nLista de páginas escritas por ", autor_ex, ":\n", autor_quantidade_paginas_escritas(res, autor_ex))
   print("\nLista de livros do ano ",ano_ex, ":\n", ano_lista_livros(res, ano_ex))
+  print(ano_qtd_livros(res,ano_ex))
   print("\nLista de anos com mais de ", quantidade_ex, " livros:\n", ano_lista_maior_N(res, quantidade_ex))
 
 #testador de funcoes implementadas
@@ -409,7 +398,7 @@ def meu_testador_3(res):
 ##########################################
 ##########TESTES RECOMENDADOS#############
 #meu_testador_1(resultados_query)
-#meu_testador_3(resultados_query)
-#meu_testador_4(resultados_query)
+#meu_testador_2(resultados_query)
+meu_testador_3(resultados_query)
 
 
